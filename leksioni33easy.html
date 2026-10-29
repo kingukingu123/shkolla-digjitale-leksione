@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Name Input Form</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 40px;
+    }
+
+    .form-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    label {
+      font-weight: bold;
+    }
+
+    input[type="text"] {
+      padding: 8px 12px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      outline: none;
+    }
+
+    input[type="text"].invalid {
+      border-color: #d9534f;
+    }
+
+    .error-message {
+      color: #d9534f;
+      font-size: 14px;
+      display: none; /* Hidden by default */
+    }
+
+    .error-message.visible {
+      display: inline;
+    }
+  </style>
+</head>
+<body>
+
+  <form id="nameForm" novalidate>
+    <div class="form-group">
+      <label for="userName">Name:</label>
+      <input type="text" id="userName" name="userName" placeholder="Enter your name" autocomplete="off">
+      <span id="errorMessage" class="error-message" aria-live="polite">Only letters and spaces are allowed.</span>
+    </div>
+  </form>
+
+  <script>
+    const nameInput = document.getElementById('userName');
+    const errorMessage = document.getElementById('errorMessage');
+
+    // Regex allowing letters (including uppercase/lowercase) and spaces
+    const lettersOnlyRegex = /^[A-Za-z\s]*$/;
+
+    function validateInput() {
+      const value = nameInput.value;
+
+      if (!lettersOnlyRegex.test(value)) {
+        // Show error
+        errorMessage.classList.add('visible');
+        nameInput.classList.add('invalid');
+      } else {
+        // Hide error
+        errorMessage.classList.remove('visible');
+        nameInput.classList.remove('invalid');
+      }
+    }
+
+    // Validate in real-time as the user types
+    nameInput.addEventListener('input', validateInput);
+  </script>
+
+</body>
+</html>

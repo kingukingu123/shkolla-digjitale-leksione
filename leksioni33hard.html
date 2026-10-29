@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>User Information Form</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 40px;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      max-width: 600px;
+    }
+
+    .form-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    label {
+      font-weight: bold;
+      width: 60px;
+    }
+
+    input[type="text"] {
+      padding: 8px 12px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      outline: none;
+    }
+
+    input[type="text"].invalid {
+      border-color: #d9534f;
+    }
+
+    .error-message {
+      color: #d9534f;
+      font-size: 14px;
+      display: none; /* Hidden by default */
+    }
+
+    .error-message.visible {
+      display: inline;
+    }
+
+    button {
+      width: fit-content;
+      padding: 8px 16px;
+      font-size: 16px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+  </style>
+</head>
+<body>
+
+  <form id="userForm" novalidate>
+    <!-- Name Field -->
+    <div class="form-group">
+      <label for="userName">Name:</label>
+      <input type="text" id="userName" name="userName" placeholder="Enter your name" autocomplete="off">
+      <span id="nameError" class="error-message" aria-live="polite"></span>
+    </div>
+
+    <!-- Age Field -->
+    <div class="form-group">
+      <label for="userAge">Age:</label>
+      <input type="text" id="userAge" name="userAge" placeholder="Enter your age" autocomplete="off">
+      <span id="ageError" class="error-message" aria-live="polite"></span>
+    </div>
+
+    <button type="submit">Submit</button>
+  </form>
+
+  <script>
+    const form = document.getElementById('userForm');
+    const nameInput = document.getElementById('userName');
+    const ageInput = document.getElementById('userAge');
+    const nameError = document.getElementById('nameError');
+    const ageError = document.getElementById('ageError');
+
+    // Basic syntax regex
+    const lettersOnlyRegex = /^[A-Za-z\s]*$/;
+    const digitsOnlyRegex = /^[0-9]+$/;
+
+    // Validate Name Field
+    function validateName() {
+      const rawValue = nameInput.value;
+      const trimmedValue = rawValue.trim();
+
+      if (trimmedValue === '') {
+        showError(nameInput, nameError, 'Name is required.');
+        return false;
+      }
+      
+      if (!lettersOnlyRegex.test(rawValue)) {
+        showError(nameInput, nameError, 'Only letters and spaces are allowed.');
+        return false;
+      }
+
+      if (trimmedValue.length < 2) {
+        showError(nameInput, nameError, 'Name must be at least 2 characters long.');
+        return false;
+      }
+
+      hideError(nameInput, nameError);
+      return true;
+    }
+
+    // Validate Age Field
+    function validateAge() {
+      const rawValue = ageInput.value.trim();
+
+      if (rawValue === '') {
+        showError(ageInput, ageError, 'Age is required.');
+        return false;
+      }
+
+      if (!digitsOnlyRegex.test(rawValue)) {
+        showError(ageInput, ageError, 'Only positive whole numbers are allowed.');
+        return false;
+      }
+
+      const ageNum = parseInt(rawValue, 10);
+      if (ageNum < 0 || ageNum > 120) {
+        showError(ageInput, ageError, 'Age must be between 0 and 120.');
+        return false;
+      }
+
+      hideError(ageInput, ageError);
+      return true;
+    }
+
+    // Helper functions for UI feedback
+    function showError(inputElement, errorElement, message) {
+      errorElement.textContent = message;
+      errorElement.classList.add('visible');
+      inputElement.classList.add('invalid');
+    }
+
+    function hideError(inputElement, errorElement) {
+      errorElement.textContent = '';
+      errorElement.classList.remove('visible');
+      inputElement.classList.remove('invalid');
+    }
+
+    // Real-time validation listeners
+    nameInput.addEventListener('input', validateName);
+    ageInput.addEventListener('input', validateAge);
+
+    // Form submission validation
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+
+      const isNameValid = validateName();
+      const isAgeValid = validateAge();
+
+      if (isNameValid && isAgeValid) {
+        alert('Form submitted successfully!');
+      }
+    });
+  </script>
+
+</body>
+</html>

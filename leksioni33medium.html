@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>User Information Form</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 40px;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      max-width: 600px;
+    }
+
+    .form-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    label {
+      font-weight: bold;
+      width: 60px;
+    }
+
+    input[type="text"] {
+      padding: 8px 12px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      outline: none;
+    }
+
+    input[type="text"].invalid {
+      border-color: #d9534f;
+    }
+
+    .error-message {
+      color: #d9534f;
+      font-size: 14px;
+      display: none; /* Hidden by default */
+    }
+
+    .error-message.visible {
+      display: inline;
+    }
+
+    button {
+      width: fit-content;
+      padding: 8px 16px;
+      font-size: 16px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+  </style>
+</head>
+<body>
+
+  <form id="userForm" novalidate>
+    <!-- Name Field -->
+    <div class="form-group">
+      <label for="userName">Name:</label>
+      <input type="text" id="userName" name="userName" placeholder="Enter your name" autocomplete="off">
+      <span id="nameError" class="error-message" aria-live="polite">Only letters and spaces are allowed.</span>
+    </div>
+
+    <!-- Age Field -->
+    <div class="form-group">
+      <label for="userAge">Age:</label>
+      <input type="text" id="userAge" name="userAge" placeholder="Enter your age" autocomplete="off">
+      <span id="ageError" class="error-message" aria-live="polite">Only numbers are allowed.</span>
+    </div>
+
+    <button type="submit">Submit</button>
+  </form>
+
+  <script>
+    const form = document.getElementById('userForm');
+    const nameInput = document.getElementById('userName');
+    const ageInput = document.getElementById('userAge');
+    const nameError = document.getElementById('nameError');
+    const ageError = document.getElementById('ageError');
+
+    // Validation patterns
+    const lettersOnlyRegex = /^[A-Za-z\s]*$/;
+    const numbersOnlyRegex = /^[0-9]*$/;
+
+    // Validate Name Field
+    function validateName() {
+      const value = nameInput.value.trim();
+      const isValid = lettersOnlyRegex.test(nameInput.value) && value !== '';
+      
+      if (!isValid) {
+        nameError.textContent = value === '' ? 'Name is required.' : 'Only letters and spaces are allowed.';
+        nameError.classList.add('visible');
+        nameInput.classList.add('invalid');
+      } else {
+        nameError.classList.remove('visible');
+        nameInput.classList.remove('invalid');
+      }
+      return isValid;
+    }
+
+    // Validate Age Field
+    function validateAge() {
+      const value = ageInput.value.trim();
+      const isValid = numbersOnlyRegex.test(ageInput.value) && value !== '';
+
+      if (!isValid) {
+        ageError.textContent = value === '' ? 'Age is required.' : 'Only numbers are allowed.';
+        ageError.classList.add('visible');
+        ageInput.classList.add('invalid');
+      } else {
+        ageError.classList.remove('visible');
+        ageInput.classList.remove('invalid');
+      }
+      return isValid;
+    }
+
+    // Real-time validation listeners
+    nameInput.addEventListener('input', validateName);
+    ageInput.addEventListener('input', validateAge);
+
+    // Form submission validation
+    form.addEventListener('submit', (e) => {
+      e.preventDefault(); // Prevent default form submission
+
+      const isNameValid = validateName();
+      const isAgeValid = validateAge();
+
+      if (isNameValid && isAgeValid) {
+        alert('Form submitted successfully!');
+        // Proceed with actual submit logic (e.g., fetch API call)
+      }
+    });
+  </script>
+
+</body>
+</html>
