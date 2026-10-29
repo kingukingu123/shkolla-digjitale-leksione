@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simple Calculator</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 40px;
+      display: flex;
+      justify-content: center;
+    }
+
+    .calculator-card {
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      padding: 24px;
+      width: 320px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    label {
+      font-weight: bold;
+      font-size: 14px;
+    }
+
+    input[type="number"], select {
+      padding: 10px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      outline: none;
+    }
+
+    input[type="number"]:focus, select:focus {
+      border-color: #007bff;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      font-size: 16px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+      margin-top: 8px;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    .result-container {
+      margin-top: 20px;
+      padding: 12px;
+      background-color: #f8f9fa;
+      border-radius: 4px;
+      text-align: center;
+      font-size: 18px;
+      font-weight: bold;
+      min-height: 24px;
+    }
+
+    .error-text {
+      color: #d9534f;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="calculator-card">
+    <form id="calcForm">
+      <!-- First Number Input -->
+      <div class="form-group">
+        <label for="num1">First Number</label>
+        <input type="number" id="num1" step="any" placeholder="e.g. 10" required>
+      </div>
+
+      <!-- Second Number Input -->
+      <div class="form-group">
+        <label for="num2">Second Number</label>
+        <input type="number" id="num2" step="any" placeholder="e.g. 5" required>
+      </div>
+
+      <!-- Operation Selector -->
+      <div class="form-group">
+        <label for="operation">Operation</label>
+        <select id="operation">
+          <option value="add">Addition (+)</option>
+          <option value="subtract">Subtraction (-)</option>
+          <option value="multiply">Multiplication (×)</option>
+          <option value="divide">Division (÷)</option>
+        </select>
+      </div>
+
+      <!-- Calculate Button -->
+      <button type="submit">Calculate</button>
+    </form>
+
+    <!-- Result Display -->
+    <div id="result" class="result-container" aria-live="polite">
+      Result will appear here
+    </div>
+  </div>
+
+  <script>
+    const calcForm = document.getElementById('calcForm');
+    const num1Input = document.getElementById('num1');
+    const num2Input = document.getElementById('num2');
+    const operationSelect = document.getElementById('operation');
+    const resultDisplay = document.getElementById('result');
+
+    calcForm.addEventListener('submit', (e) => {
+      e.preventDefault(); // Prevent page reload
+
+      // Parse inputs as floating point numbers
+      const num1 = parseFloat(num1Input.value);
+      const num2 = parseFloat(num2Input.value);
+      const operation = operationSelect.value;
+
+      // Ensure valid numbers were entered
+      if (isNaN(num1) || isNaN(num2)) {
+        resultDisplay.textContent = 'Please enter valid numbers.';
+        resultDisplay.className = 'result-container error-text';
+        return;
+      }
+
+      let result;
+
+      // Perform calculation based on dropdown selection
+      switch (operation) {
+        case 'add':
+          result = num1 + num2;
+          break;
+        case 'subtract':
+          result = num1 - num2;
+          break;
+        case 'multiply':
+          result = num1 * num2;
+          break;
+        case 'divide':
+          if (num2 === 0) {
+            resultDisplay.textContent = 'Cannot divide by zero.';
+            resultDisplay.className = 'result-container error-text';
+            return;
+          }
+          result = num1 / num2;
+          break;
+        default:
+          resultDisplay.textContent = 'Invalid operation selected.';
+          resultDisplay.className = 'result-container error-text';
+          return;
+      }
+
+      // Display result rounded cleanly if necessary
+      resultDisplay.textContent = `Result: ${result}`;
+      resultDisplay.className = 'result-container';
+    });
+  </script>
+
+</body>
+</html>

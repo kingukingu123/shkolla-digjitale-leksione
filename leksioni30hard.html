@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dynamic Digital Clock & Alarm</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      color: #f8fafc;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 480px;
+      background: rgba(30, 41, 59, 0.7);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      padding: 30px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+    }
+
+    /* Tab Navigation */
+    .tabs {
+      display: flex;
+      background: rgba(15, 23, 42, 0.6);
+      border-radius: 12px;
+      padding: 4px;
+      margin-bottom: 24px;
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 10px;
+      border: none;
+      background: transparent;
+      color: #94a3b8;
+      font-size: 14px;
+      font-weight: 600;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .tab-btn.active {
+      background: #3b82f6;
+      color: #ffffff;
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    /* Clock Display */
+    .clock-display {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    .time {
+      font-size: 48px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      font-variant-numeric: tabular-nums;
+      color: #ffffff;
+      text-shadow: 0 0 20px rgba(59, 130, 246, 0.5);
+    }
+
+    .date {
+      font-size: 16px;
+      color: #94a3b8;
+      margin-top: 6px;
+    }
+
+    /* Form Controls */
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: #94a3b8;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    input[type="time"],
+    input[type="number"],
+    input[type="text"] {
+      width: 100%;
+      padding: 12px;
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      color: #ffffff;
+      font-size: 16px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    input[type="time"]:focus,
+    input[type="number"]:focus,
+    input[type="text"]:focus {
+      border-color: #3b82f6;
+    }
+
+    button.btn-primary {
+      width: 100%;
+      padding: 12px;
+      background: #3b82f6;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    button.btn-primary:hover {
+      background: #2563eb;
+    }
+
+    /* Alarm List */
+    .alarm-list {
+      margin-top: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-height: 180px;
+      overflow-y: auto;
+    }
+
+    .alarm-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(15, 23, 42, 0.4);
+      padding: 12px 16px;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .alarm-info {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .alarm-time {
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    .alarm-label {
+      font-size: 12px;
+      color: #94a3b8;
+    }
+
+    .delete-btn {
+      background: rgba(239, 68, 68, 0.2);
+      color: #ef4444;
+      border: none;
+      padding: 6px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+      transition: background 0.2s;
+    }
+
+    .delete-btn:hover {
+      background: rgba(239, 68, 68, 0.4);
+    }
+
+    /* Active Alarm Alert Overlay */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(8px);
+      z-index: 100;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .modal {
+      background: #1e293b;
+      border: 1px solid #ef4444;
+      padding: 30px;
+      border-radius: 16px;
+      text-align: center;
+      box-shadow: 0 0 30px rgba(239, 68, 68, 0.4);
+      max-width: 320px;
+      width: 90%;
+      animation: pulse 1s infinite alternate;
+    }
+
+    @keyframes pulse {
+      from { transform: scale(1); }
+      to { transform: scale(1.03); }
+    }
+
+    .modal h2 {
+      color: #ef4444;
+      margin-bottom: 10px;
+    }
+
+    .modal p {
+      color: #cbd5e1;
+      margin-bottom: 20px;
+    }
+
+    .dismiss-btn {
+      background: #ef4444;
+      color: white;
+      border: none;
+      padding: 10px 24px;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .dismiss-btn:hover {
+      background: #dc2626;
+    }
+
+    /* Stopwatch / Timer Controls */
+    .controls-row {
+      display: flex;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .btn-secondary {
+      flex: 1;
+      padding: 10px;
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <!-- Navigation Tabs -->
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab('clock')">Clock & Alarm</button>
+      <button class="tab-btn" onclick="switchTab('stopwatch')">Stopwatch</button>
+      <button class="tab-btn" onclick="switchTab('timer')">Timer</button>
+    </div>
+
+    <!-- Clock & Alarm Tab -->
+    <div id="clockTab" class="tab-content active">
+      <div class="clock-display">
+        <div id="currentTime" class="time">00:00:00</div>
+        <div id="currentDate" class="date">Loading date...</div>
+      </div>
+
+      <div class="form-group">
+        <label for="alarmTime">Set Alarm Time</label>
+        <input type="time" id="alarmTime" step="1">
+      </div>
+
+      <div class="form-group">
+        <label for="alarmLabel">Label (Optional)</label>
+        <input type="text" id="alarmLabel" placeholder="e.g. Wake up, Meeting">
+      </div>
+
+      <button class="btn-primary" onclick="addAlarm()">Add Alarm</button>
+
+      <div id="alarmList" class="alarm-list"></div>
+    </div>
+
+    <!-- Stopwatch Tab -->
+    <div id="stopwatchTab" class="tab-content">
+      <div class="clock-display">
+        <div id="stopwatchDisplay" class="time">00:00:00.00</div>
+      </div>
+      <div class="controls-row">
+        <button id="swStartBtn" class="btn-primary" onclick="toggleStopwatch()">Start</button>
+        <button class="btn-secondary" onclick="resetStopwatch()">Reset</button>
+      </div>
+    </div>
+
+    <!-- Timer Tab -->
+    <div id="timerTab" class="tab-content">
+      <div class="clock-display">
+        <div id="timerDisplay" class="time">00:00:00</div>
+      </div>
+      <div class="form-group">
+        <label for="timerInput">Set Duration (Seconds)</label>
+        <input type="number" id="timerInput" min="1" placeholder="e.g. 60">
+      </div>
+      <div class="controls-row">
+        <button id="timerStartBtn" class="btn-primary" onclick="toggleTimer()">Start</button>
+        <button class="btn-secondary" onclick="resetTimer()">Reset</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Alarm Trigger Overlay Modal -->
+  <div id="alarmModal" class="modal-overlay">
+    <div class="modal">
+      <h2>⏰ ALARM!</h2>
+      <p id="alarmModalText">Your alarm is going off!</p>
+      <button class="dismiss-btn" onclick="dismissAlarm()">Dismiss</button>
+    </div>
+  </div>
+
+  <script>
+    // Audio Context Synthesizer for Alarm Sound
+    let audioCtx = null;
+    let alarmInterval = null;
+
+    function playBeep() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(880, audioCtx.currentTime); // A5 note
+
+      gain.gain.setValueAtTime(0.5, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.5);
+
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.5);
+    }
+
+    function triggerAudioAlert() {
+      playBeep();
+      alarmInterval = setInterval(playBeep, 800);
+    }
+
+    function stopAudioAlert() {
+      if (alarmInterval) {
+        clearInterval(alarmInterval);
+        alarmInterval = null;
+      }
+    }
+
+    // Tab Navigation
+    function switchTab(tabName) {
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+
+      if (tabName === 'clock') {
+        document.querySelectorAll('.tab-btn')[0].classList.add('active');
+        document.getElementById('clockTab').classList.add('active');
+      } else if (tabName === 'stopwatch') {
+        document.querySelectorAll('.tab-btn')[1].classList.add('active');
+        document.getElementById('stopwatchTab').classList.add('active');
+      } else if (tabName === 'timer') {
+        document.querySelectorAll('.tab-btn')[2].classList.add('active');
+        document.getElementById('timerTab').classList.add('active');
+      }
+    }
+
+    // Digital Clock & Date
+    let alarms = JSON.parse(localStorage.getItem('clock_alarms') || '[]');
+
+    function updateClock() {
+      const now = new Date();
+      
+      const hours = String(now.getHours()).padStart(2, '0');
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      const seconds = String(now.getSeconds()).padStart(2, '0');
+
+      document.getElementById('currentTime').textContent = `${hours}:${minutes}:${seconds}`;
+
+      const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+      document.getElementById('currentDate').textContent = now.toLocaleDateString(undefined, options);
+
+      // Check Alarms
+      const timeString = `${hours}:${minutes}:${seconds}`;
+      alarms.forEach(alarm => {
+        const formattedAlarmTime = alarm.time.length === 5 ? `${alarm.time}:00` : alarm.time;
+        if (formattedAlarmTime === timeString && !alarm.triggered) {
+          alarm.triggered = true;
+          ringAlarm(alarm.label);
+        }
+        // Reset trigger state when time moves past the alarm minute/second
+        if (formattedAlarmTime !== timeString) {
+          alarm.triggered = false;
+        }
+      });
+    }
+
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    // Alarm Management
+    function renderAlarms() {
+      const listContainer = document.getElementById('alarmList');
+      listContainer.innerHTML = '';
+
+      alarms.forEach((alarm, index) => {
+        const item = document.createElement('div');
+        item.className = 'alarm-item';
+        item.innerHTML = `
+          <div class="alarm-info">
+            <span class="alarm-time">${alarm.time}</span>
+            <span class="alarm-label">${alarm.label || 'No Label'}</span>
+          </div>
+          <button class="delete-btn" onclick="deleteAlarm(${index})">Delete</button>
+        `;
+        listContainer.appendChild(item);
+      });
+
+      localStorage.setItem('clock_alarms', JSON.stringify(alarms));
+    }
+
+    function addAlarm() {
+      const timeInput = document.getElementById('alarmTime');
+      const labelInput = document.getElementById('alarmLabel');
+
+      if (!timeInput.value) {
+        alert('Please select a time for the alarm.');
+        return;
+      }
+
+      alarms.push({
+        time: timeInput.value,
+        label: labelInput.value.trim(),
+        triggered: false
+      });
+
+      timeInput.value = '';
+      labelInput.value = '';
+      renderAlarms();
+    }
+
+    function deleteAlarm(index) {
+      alarms.splice(index, 1);
+      renderAlarms();
+    }
+
+    function ringAlarm(label) {
+      document.getElementById('alarmModalText').textContent = label ? `Alarm: "${label}"` : 'Your alarm is going off!';
+      document.getElementById('alarmModal').classList.add('active');
+      triggerAudioAlert();
+    }
+
+    function dismissAlarm() {
+      document.getElementById('alarmModal').classList.remove('active');
+      stopAudioAlert();
+    }
+
+    renderAlarms();
+
+    // Stopwatch Logic
+    let swInterval = null;
+    let swElapsedTime = 0;
+    let swStartTime = 0;
+
+    function formatStopwatch(ms) {
+      const totalSec = Math.floor(ms / 1000);
+      const h = String(Math.floor(totalSec / 3600)).padStart(2, '0');
+      const m = String(Math.floor((totalSec % 3600) / 60)).padStart(2, '0');
+      const s = String(totalSec % 60).padStart(2, '0');
+      const cs = String(Math.floor((ms % 1000) / 10)).padStart(2, '0');
+      return `${h}:${m}:${s}.${cs}`;
+    }
+
+    function toggleStopwatch() {
+      const btn = document.getElementById('swStartBtn');
+      if (swInterval) {
+        clearInterval(swInterval);
+        swInterval = null;
+        btn.textContent = 'Start';
+      } else {
+        swStartTime = Date.now() - swElapsedTime;
+        swInterval = setInterval(() => {
+          swElapsedTime = Date.now() - swStartTime;
+          document.getElementById('stopwatchDisplay').textContent = formatStopwatch(swElapsedTime);
+        }, 10);
+        btn.textContent = 'Pause';
+      }
+    }
+
+    function resetStopwatch() {
+      if (swInterval) {
+        clearInterval(swInterval);
+        swInterval = null;
+      }
+      swElapsedTime = 0;
+      document.getElementById('swStartBtn').textContent = 'Start';
+      document.getElementById('stopwatchDisplay').textContent = '00:00:00.00';
+    }
+
+    // Countdown Timer Logic
+    let timerInterval = null;
+    let timerRemaining = 0;
+
+    function formatTimer(sec) {
+      const h = String(Math.floor(sec / 3600)).padStart(2, '0');
+      const m = String(Math.floor((sec % 3600) / 60)).padStart(2, '0');
+      const s = String(sec % 60).padStart(2, '0');
+      return `${h}:${m}:${s}`;
+    }
+
+    function toggleTimer() {
+      const btn = document.getElementById('timerStartBtn');
+      const input = document.getElementById('timerInput');
+
+      if (timerInterval) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+        btn.textContent = 'Start';
+        return;
+      }
+
+      if (timerRemaining === 0) {
+        const inputVal = parseInt(input.value, 10);
+        if (isNaN(inputVal) || inputVal <= 0) {
+          alert('Please enter a valid duration in seconds.');
+          return;
+        }
+        timerRemaining = inputVal;
+      }
+
+      document.getElementById('timerDisplay').textContent = formatTimer(timerRemaining);
+
+      timerInterval = setInterval(() => {
+        timerRemaining--;
+        document.getElementById('timerDisplay').textContent = formatTimer(timerRemaining);
+
+        if (timerRemaining <= 0) {
+          clearInterval(timerInterval);
+          timerInterval = null;
+          btn.textContent = 'Start';
+          ringAlarm('Timer Finished!');
+        }
+      }, 1000);
+
+      btn.textContent = 'Pause';
+    }
+
+    function resetTimer() {
+      if (timerInterval) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+      }
+      timerRemaining = 0;
+      document.getElementById('timerStartBtn').textContent = 'Start';
+      document.getElementById('timerDisplay').textContent = '00:00:00';
+    }
+  </script>
+
+</body>
+</html>
