@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Name Input Form</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 40px;
+    }
+
+    .form-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    label {
+      font-weight: bold;
+    }
+
+    input[type="text"] {
+      padding: 8px 12px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      outline: none;
+    }
+
+    input[type="text"].invalid {
+      border-color: #d9534f;
+    }
+
+    .error-message {
+      color: #d9534f;
+      font-size: 14px;
+      display: none; /* Hidden by default */
+    }
+
+    .error-message.visible {
+      display: inline;
+    }
+  </style>
+</head>
+<body>
+
+  <form id="nameForm" novalidate>
+    <div class="form-group">
+      <label for="userName">Name:</label>
+      <input type="text" id="userName" name="userName" placeholder="Enter your name" autocomplete="off">
+      <span id="nameError" class="error-message" aria-live="polite">Only letters and spaces are allowed.</span>
+    </div>
+  </form>
+
+  <script>
+    const nameInput = document.getElementById('userName');
+    const nameError = document.getElementById('nameError');
+
+    // Regular expression allowing uppercase letters, lowercase letters, and spaces
+    const lettersOnlyRegex = /^[A-Za-z\s]*$/;
+
+    nameInput.addEventListener('input', () => {
+      const value = nameInput.value;
+
+      if (!lettersOnlyRegex.test(value)) {
+        // Show error message and highlight input
+        nameError.classList.add('visible');
+        nameInput.classList.add('invalid');
+      } else {
+        // Hide error message and remove highlight
+        nameError.classList.remove('visible');
+        nameInput.classList.remove('invalid');
+      }
+    });
+  </script>
+
+</body>
+</html>
